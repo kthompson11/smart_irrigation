@@ -1,0 +1,4 @@
+SANITY_VERSION 1
+TMPDIR /home/kt/dev/projects/poky/build/tmp
+SSTATE_DIR /home/kt/dev/projects/poky/build/sstate-cache
+NATIVELSBSTRING debian
