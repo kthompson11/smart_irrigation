@@ -24,8 +24,6 @@ SECTIONS
         _etext = .;
     } >FLASH
 
-    
-
     /* initialized data */
     _sidata = .;
     .data :
