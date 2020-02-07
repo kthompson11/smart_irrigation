@@ -10,6 +10,7 @@
 
 #define BUFFER_SIZE 2
 
+/* TODO: move buffers to private data */
 struct spi_dev_data
 {
     char *txBuffer;
@@ -33,12 +34,6 @@ static int open_spi_dev(struct inode *inode, struct file *file)
 
 static int release_spi_dev(struct inode *inode, struct file *file)
 {
-    /* TODO: remove this check after determining release is behaving as expected */
-    if (IsDeviceOpen == 0)
-    {
-        printk(KERN_ERR KBUILD_MODNAME ": release called on unopened file");
-    }
-
     IsDeviceOpen = 0;
 
     return 0;
@@ -122,8 +117,6 @@ out_err:
 
 static void __exit exit_spi_dev(void)
 {
-    
-
     /* free spi library resources */
     bcm2835_spi0_free();
 
