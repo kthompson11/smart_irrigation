@@ -27,7 +27,7 @@ INCDIRS  := $(patsubst %,-I%, $(INCDIRS))
 OUT_NAME = $(OUTDIR)/$(PROJECT)
 
 # Sources
-SRC  = src/main.c lib/CMSIS/ST/system_stm32f0xx.c
+SRC  = src/main.c src/system_timer.c lib/CMSIS/ST/system_stm32f0xx.c
 
 # Objects
 OBJ = $(SRC:%.c=%.o) lib/CMSIS/ST/startup_stm32f051x8.o
