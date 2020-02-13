@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 
-extern uint32_t systick_ms_count;
-
 void init_system_timer(void);
+uint32_t get_systick_ms_count(void);
 
 #endif  /* SYSTEM_TIMER_H */

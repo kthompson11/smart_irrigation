@@ -16,6 +16,11 @@ void init_system_timer(void)
     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;  /* enable the SysTick timer */
 }
 
+uint32_t get_systick_ms_count(void)
+{
+    return systick_ms_count;
+}
+
 void SysTick_Handler(void)
 {
     systick_ms_count += 1;
