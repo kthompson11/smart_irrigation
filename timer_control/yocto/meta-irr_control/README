@@ -1,41 +1,31 @@
-This README file contains information on the contents of the meta-irr_control layer.
+meta-irr_control
+===============
 
-Please see the corresponding sections below for details.
+This layer configures the default poky distribution to support irr_control.
+
 
 Dependencies
 ============
 
-  URI: <first dependency>
-  branch: <branch name>
+  URI: git://git.yoctoproject.org/meta-raspberrypi
+  branch: zeus
+  revision: HEAD
 
-  URI: <second dependency>
-  branch: <branch name>
+  All dependencies of dependencies should be on:
+  branch: zeus
+  revision: HEAD
 
-  .
-  .
-  .
-
-Patches
-=======
-
-Please submit any patches against the meta-irr_control layer to the xxxx mailing list (xxxx@zzzz.org)
-and cc: the maintainer:
-
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
 
 Table of Contents
 =================
 
   I. Adding the meta-irr_control layer to your build
- II. Misc
 
 
 I. Adding the meta-irr_control layer to your build
 =================================================
 
-Run 'bitbake-layers add-layer meta-irr_control'
+  Add the provided config directory to the build directory
+  Run 'bitbake-layers add-layer meta-irr_control'
+  
 
-II. Misc
-========
-
---- replace with specific information about the meta-irr_control layer ---
