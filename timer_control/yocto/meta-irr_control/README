@@ -20,7 +20,7 @@ Table of Contents
 =================
 
   I. Adding the meta-irr_control layer to your build
-
+  II. Building the system
 
 I. Adding the meta-irr_control layer to your build
 =================================================
@@ -29,3 +29,9 @@ I. Adding the meta-irr_control layer to your build
   Run 'bitbake-layers add-layer meta-irr_control'
   
 
+II. Building the system
+=======================
+
+  1. source oe-init-build-env
+  2. Add the layer as described in section I
+  3. bitbake core-image-base
