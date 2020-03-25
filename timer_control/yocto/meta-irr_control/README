@@ -34,4 +34,8 @@ II. Building the system
 
   1. source oe-init-build-env
   2. Add the layer as described in section I
+  3. Create a wpa-supplicant configuration file. Navigate to 
+     recipes-connectivity/wpa-supplicant. Modify 
+     wpa-supplicant.conf-sane.example with correct network configuration 
+     information and rename to wpa-supplicant.conf-sane
   3. bitbake core-image-base

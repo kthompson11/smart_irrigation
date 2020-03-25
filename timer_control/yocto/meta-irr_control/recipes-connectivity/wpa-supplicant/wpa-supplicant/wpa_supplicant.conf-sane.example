@@ -1,0 +1,9 @@
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=US
+
+network={
+  ssid="example ssid"
+  psk=3f9aaf4837cf62ce7add940829d8239c837a91f5790ef90346679d95484f18c0
+  key_mgmt=WPA-PSK
+}
