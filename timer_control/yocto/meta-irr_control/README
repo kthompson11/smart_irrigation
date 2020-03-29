@@ -38,4 +38,4 @@ II. Building the system
      recipes-connectivity/wpa-supplicant. Modify 
      wpa-supplicant.conf-sane.example with correct network configuration 
      information and rename to wpa-supplicant.conf-sane
-  3. bitbake core-image-base
+  3. bitbake irr-control-image
