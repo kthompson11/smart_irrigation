@@ -1,2 +1,3 @@
 Add scheduling and weather retrieval
 Add web interface
+Create patch for bcm2708-rpi-zero-w.dts to remove spidev0 and spidev1

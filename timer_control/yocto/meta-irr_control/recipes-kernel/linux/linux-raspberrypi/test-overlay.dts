@@ -1,0 +1,24 @@
+/dts-v1/;
+/plugin/;
+
+/* This is a test of using device tree overlays with Yocto. */
+/* Currently, it enables spi0 but disables the device on chip select 0 */i
+/* NOTE: "removing" a node by setting its status to disabled may be buggy */
+
+/{
+	compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&spi>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			spidev0: spidev@0 {
+				status = "disabled";
+				reg = <0>;
+			};
+		};
+	};
+};

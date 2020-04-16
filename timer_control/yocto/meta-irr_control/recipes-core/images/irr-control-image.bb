@@ -12,3 +12,5 @@ EXTRA_USERS_PARAMS = "\
 	groupadd spi; \
 	usermod -a -G spi irr_user; \
 	"
+
+KERNEL_DEVICETREE =+ "overlays/test.dtbo"
