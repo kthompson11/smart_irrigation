@@ -2,7 +2,7 @@
 /plugin/;
 
 /* This is a test of using device tree overlays with Yocto. */
-/* Currently, it enables spi0 but disables the device on chip select 0 */i
+/* Currently, it enables spi0 but disables the device on chip select 0 */
 /* NOTE: "removing" a node by setting its status to disabled may be buggy */
 
 /{
@@ -16,8 +16,11 @@
 			status = "okay";
 
 			spidev0: spidev@0 {
-				status = "disabled";
-				reg = <0>;
+				compatible = "spidev";
+				reg = <0>;	/* CE0 */
+				#address-cells = <1>;
+				#size-cells = <0>;
+				spi-max-frequency = <125000000>;
 			};
 		};
 	};
