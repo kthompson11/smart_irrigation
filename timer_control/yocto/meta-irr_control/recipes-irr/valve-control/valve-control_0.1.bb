@@ -1,6 +1,6 @@
 SUMMARY = "Bitbake recipe to build and install the valve-control driver."
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://COPYING;md5=54575e81a786e9aa7d98337ec2e1ebb0"
+LICENSE = "GPLv2"
+LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 inherit module
 
