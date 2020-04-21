@@ -13,4 +13,4 @@ EXTRA_USERS_PARAMS = "\
 	usermod -a -G spi irr_user; \
 	"
 
-KERNEL_DEVICETREE =+ "overlays/test.dtbo"
+KERNEL_DEVICETREE =+ "overlays/valve-control.dtbo"
