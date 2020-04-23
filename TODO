@@ -1,3 +1,4 @@
 Add scheduling and weather retrieval
 Add web interface
-Create unified header for interface between valve-control driver and microcontroller.
+Create unified header for interface between vc-driver and microcontroller.
+Rewrite valve-control microcontroller firmware using FreeRTOS.
