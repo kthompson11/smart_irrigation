@@ -1,5 +1,7 @@
 obj-m = valve-control.o
 
+valve-control-y := vc-driver.o
+
 SRC = $(shell pwd)
 
 all:

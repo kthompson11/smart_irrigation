@@ -5,7 +5,7 @@
 #include <linux/uaccess.h>
 
 #include "vc-driver.h"
-#include "valve_messaging.h"
+#include "vc-interface.h"
 
 #define N_MINORS 1
 
@@ -31,7 +31,7 @@ static struct driver_data drv_data;
 
 static int op_write(u8 cmd, u8 arg, struct spi_device *spi)
 {
-	u8 tx_buf = VC_MAKE_OP(cmd, arg);
+	u8 tx_buf = vc_make_request(cmd, arg);
 	struct spi_transfer tx = {
 		.tx_buf = &tx_buf,
 		.len = 1,
