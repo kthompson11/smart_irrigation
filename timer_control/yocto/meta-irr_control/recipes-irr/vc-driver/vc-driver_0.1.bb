@@ -6,7 +6,9 @@ inherit module
 
 SRC_URI = "file://COPYING;subdir=${WORKDIR}/${BPN} \
            file://Makefile;subdir=${WORKDIR}/${BPN} \
-           file://valve-control.c;subdir=${WORKDIR}/${BPN} \
+           file://vc-driver.c;subdir=${WORKDIR}/${BPN} \
+           file://vc-driver.h;subdir=${WORKDIR}/${BPN} \
+           file://vc-interface.h;subdir=${WORKDIR}/${BPN} \
           "
 
 S = "${WORKDIR}/${BPN}"
