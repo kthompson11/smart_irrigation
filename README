@@ -17,3 +17,11 @@ build the linux system for the raspberry pi.
 
 "valve_control" contains the firmware for the stm32f051 microcontroller. It
 handles communication with the raspberry pi and controls the valves.
+
+########## yocto ##########
+
+Contains the Yocto Project layer and configuration files.
+
+########## vc-driver ##########
+
+Contains the driver for the microcontroller.
