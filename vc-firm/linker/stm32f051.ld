@@ -1,6 +1,6 @@
 /* Linker script for STM32F051R8 */
 
-_Stack_Size = 0x400;  /* 1 kB */
+_Stack_Size = 0x800;  /* 2 kB */
 
 ENTRY(Reset_Handler)
 
@@ -28,6 +28,20 @@ SECTIONS
         _etext = .;
     } >FLASH
 
+    .init :
+    {
+        . = ALIGN(4);
+        KEEP (*(.init))
+        . = ALIGN(4);
+    } >FLASH
+
+    .fini :
+    {
+        . = ALIGN(4);
+        KEEP (*(.fini))
+        . = ALIGN(4);
+    } >FLASH
+
     .rodata :
     {
         . = ALIGN(4);
@@ -35,20 +49,27 @@ SECTIONS
         . = ALIGN(4);
     } >FLASH
 
-    .init_array :
+    .preinit_array    :
     {
-        . = ALIGN(4);
-        KEEP(*SORT(.init_array.*))
-        KEEP(*(.init_array*))
-        . = ALIGN(4);
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP (*(.preinit_array))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
     } >FLASH
 
-    .fini_array :
+    .init_array    :
     {
-        . = ALIGN(4);
-        KEEP(*SORT(.fini_array.*))
-        KEEP(*(.fini_array*))
-        . = ALIGN(4);
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
+        PROVIDE_HIDDEN (__init_array_end = .);
+    } >FLASH
+
+    .fini_array    :
+    {
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
+        KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
+        PROVIDE_HIDDEN (__fini_array_end = .);
     } >FLASH
 
     /* initialized data */
@@ -74,6 +95,7 @@ SECTIONS
         _ebss = .;
         __bss_end__ = _ebss;
     } >RAM
+    PROVIDE(end = .);
 
     /* check that there is enough remaining space for the stack */
     _estack = ORIGIN(RAM) + LENGTH(RAM) - 1;

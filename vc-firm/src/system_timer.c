@@ -58,7 +58,9 @@ struct systick_ms systick_ms_add(struct systick_ms lhs, uint32_t rhs)
     return res;
 }
 
+/*
 void SysTick_Handler(void)
 {
     ms_count = systick_ms_add(ms_count, 1);
 }
+*/

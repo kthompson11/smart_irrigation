@@ -20,26 +20,36 @@ AS   = $(CCPREFIX)gcc -x assembler-with-cpp
 HEX  = $(CP) -O ihex
 BIN  = $(CP) -O binary -S
 
-INCDIRS  = ./lib/CMSIS/Include
-INCDIRS += ./lib/CMSIS/ST
+INCDIRS  = ./src \
+           ./lib/CMSIS/Include \
+           ./lib/CMSIS/ST \
+           ./src/FreeRTOS/Source/portable/GCC/ARM_CM0 \
+           ./src/FreeRTOS/Source/portable/MemMang \
+           ./src/FreeRTOS/Source/include
 INCDIRS  := $(patsubst %,-I%, $(INCDIRS))
 
 OUT_NAME = $(OUTDIR)/$(PROJECT)
 
 # Sources
-SRC  = src/main.c src/system_timer.c src/valve_control.c src/valve_messaging.c lib/CMSIS/ST/system_stm32f0xx.c
+SRC := $(wildcard src/*.c) \
+       lib/CMSIS/ST/system_stm32f0xx.c \
+       $(wildcard src/FreeRTOS/Source/*.c) \
+       $(wildcard src/FreeRTOS/Source/portable/GCC/ARM_CM0/*.c) \
+       $(wildcard src/FreeRTOS/Source/portable/MemMang/*.c)
 
 # Objects
 OBJ = $(SRC:%.c=%.o) lib/CMSIS/ST/startup_stm32f051x8.o
 LST = $(OBJ:%.o=%.lst)
 
+LIB_DIR = /usr/lib/arm-none-eabi/lib/thumb/v6-m/nofp
+
 # Flags
 MCU  = cortex-m0
 MCFLAGS = -mcpu=$(MCU)
-DEBUG_FLAGS = -g -gdwarf-2
+DEBUG_FLAGS = -ggdb #-gdwarf-2
 ASFLAGS = $(MCFLAGS) $(DEBUG_FLAGS) -mthumb  -Wa,-amhls=$(<:%.s=%.lst)
-CFLAGS = $(MCFLAGS) -D $(MCU_DEFINE) $(DEBUG_FLAGS) -mthumb -fomit-frame-pointer -Wall -Wstrict-prototypes -fverbose-asm -Wa,-ahlms=$(<:%.c=%.lst) $(DEFS)
-LDFLAGS = $(MCFLAGS) $(DEBUG_FLAGS) -mthumb --specs=nosys.specs -Wl,-Map=$(OUTDIR)/$(PROJECT).map,--cref,--no-warn-mismatch
+CFLAGS = $(MCFLAGS) -D $(MCU_DEFINE) $(DEBUG_FLAGS) -O0 -falign-functions=4 -mthumb -fomit-frame-pointer -Wall -Wstrict-prototypes -fverbose-asm -Wa,-ahlms=$(<:%.c=%.lst) $(DEFS)
+LDFLAGS = $(MCFLAGS) $(DEBUG_FLAGS) -mthumb -nostartfiles --specs=nosys.specs --specs=nano.specs -Wl,-Map=$(OUTDIR)/$(PROJECT).map,--cref,--no-warn-mismatch,--gc-sections -L$(LIB_DIR)
 
 
 # Rules
@@ -59,10 +69,10 @@ flash: all
 	$(BIN)  $< $@
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) $(INCDIRS) $^ -o $@
+	$(CC) -c $(CFLAGS) $(INCDIRS) $< -o $@
 
 %.o : %.s
-	$(AS) -c $(ASFLAGS) $^ -o $@
+	$(AS) -c $(ASFLAGS) $< -o $@
 
 clean :
 	rm -f $(OBJ)
