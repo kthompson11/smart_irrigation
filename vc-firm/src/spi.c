@@ -44,6 +44,7 @@ void spi_task(void *param)
     struct spi_task_data *data = (struct spi_task_data*)param;
 
     /* continuously poll for incoming requests */
+    /* TODO: switch from polling to interrupts */
     for (;;) {
         int is_rx_pending = SPI1->SR & SPI_SR_RXNE;
 

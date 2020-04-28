@@ -3,6 +3,7 @@
 
 #include "valve_control.h"
 #include "vc-interface.h"
+#include "vc-config.h"
 
 /* global state */
 static int is_valve_open = 0;
