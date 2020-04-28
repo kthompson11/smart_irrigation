@@ -79,9 +79,9 @@ static ssize_t valve_control_write(struct file *filp, const char __user *buf,
 	/* TODO: check arg with function from valve_messaging.h */
 	spin_lock_irq(&data->lock);
 	if (!strcmp(cmd, VCOPEN))
-		op_write(VALVE_OPCODE_OPEN, arg, data->spi);
+		op_write(VC_OPCODE_OPEN, arg, data->spi);
 	else if (!strcmp(cmd, VCCLOSE))
-		op_write(VALVE_OPCODE_CLOSE, arg, data->spi);
+		op_write(VC_OPCODE_CLOSE, arg, data->spi);
 	else
 		return -EFAULT; /* TODO: determine corect error code */
 	spin_unlock_irq(&data->lock);
