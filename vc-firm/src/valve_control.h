@@ -1,5 +1,10 @@
+#ifndef VALVE_CONTROL_H
+#define VALVE_CONTROL_H
 
 #include <stm32f0xx.h>
+
+#include <FreeRTOS.h>
+#include <queue.h>
 
 #include "constants.h"
 
@@ -15,4 +20,11 @@ static const int Valve_Pins[N_VALVES] = { 13,
                                           14 };
 
 void init_valves(void);
-void handle_valves(struct valve_op_request *request);
+
+struct valve_task_data {
+    QueueHandle_t req_handle;
+};
+
+void valve_task(void *param);
+
+#endif /* VALVE_CONTROL_H */

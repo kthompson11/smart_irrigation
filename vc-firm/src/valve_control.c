@@ -1,12 +1,15 @@
+/* Handles opening and closing valves based on incoming requests. 
+   Only one task using valve_task should be created. */
 
 #include "valve_control.h"
 #include "system_timer.h"
 #include "valve_messaging.h"
 
-static struct systick_ms auto_shutoff_ms;
-
+/* global state */
 static int is_valve_open = 0;
 static int current_open_valve = 0;
+static TickType_t open_ticks_left = 0;  /* number of ticks until auto shutoff */
+
 
 static GPIO_TypeDef *get_gpio_base(int valve_number)
 {
@@ -105,50 +108,69 @@ void close_valve(void)
     is_valve_open = 0;
 }
 
-void open_valve(int valve_number)
+void open_valve(uint8_t valve_number)
 {
     if (current_open_valve != valve_number) { close_valve(); }
+
+    if (valve_number >= N_VALVES) {
+        return;
+    }
 
     GPIO_TypeDef *current_gpio_base = get_gpio_base(valve_number);
     int pin_number = Valve_Pins[valve_number];
 
     current_gpio_base->ODR |= GPIO_ODR_0 << pin_number;
 
-    auto_shutoff_ms = systick_ms_add(get_systick_ms_count(), MAX_OPEN_MS_COUNT);
+    open_ticks_left = pdMS_TO_TICKS(MAX_OPEN_MS_COUNT);
     is_valve_open = 1;
     current_open_valve = valve_number;
 }
 
-void handle_valves(struct valve_op_request *request)
+void handle_request(uint8_t request)
 {
-    if (request->is_op_pending)
+    /* decode request */
+    uint8_t opcode = vc_get_opcode(request);
+    uint8_t arg = vc_get_arg(request);
+
+    switch (opcode)
     {
-        /* clear request */
-        request->is_op_pending = 0;
-
-        /* decode the op */
-        enum valve_op op = decode_opcode(request->op);
-        uint8_t arg = decode_arg(request->op);
-
-        /* handle the op */
-        switch (op)
-        {
-        case VALVE_OPEN:
-            open_valve(arg);
-            break;
-        case VALVE_CLOSE:
-            close_valve();
-            break;
-        default:
-            /* unrecognized operation; take no action */
-            break;
-        }
+    case VC_OPCODE_OPEN:
+        open_valve(arg);
+        break;
+    case VC_OPCODE_CLOSE:
+        close_valve();
+        break;
+    default:
+        /* unrecognized opcode; take no action */
+        break;
     }
+}
 
-    /* check if valves should automatically close */
-    const struct systick_ms ms_count = get_systick_ms_count();
-    if (systick_gt(ms_count, auto_shutoff_ms))  /* ms_count > auto_shutoff_ms */
-    {
-        close_all_valves();
+void valve_task(void *param) 
+{
+    struct valve_task_data *data = (struct valve_task_data*)param;
+    QueueHandle_t req_handle = data->req_handle;
+    uint8_t request;
+
+    for (;;) {
+        BaseType_t status;
+        int receive_timed_out;
+
+        /* wait for request or timeout */
+        if (is_valve_open) {
+            status = xQueueReceive(req_handle, &request, open_ticks_left);
+        } else {
+            status = xQueueReceive(req_handle, &request, portMAX_DELAY);
+        }
+
+        /* get reason for waking */
+        receive_timed_out = (status == errQUEUE_EMPTY);
+
+        if (receive_timed_out) {
+            close_all_valves();
+            is_valve_open = 0;
+        } else {
+            handle_request(request);
+        }
     }
 }
