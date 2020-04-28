@@ -69,7 +69,7 @@ flash: all
 	$(BIN) $< $@
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) -MMD $(INCDIRS) $< -o $@
+	$(CC) -c $(CFLAGS) $(INCDIRS) $< -o $@
 
 %.o : %.s
 	$(AS) -c $(ASFLAGS) $< -o $@
