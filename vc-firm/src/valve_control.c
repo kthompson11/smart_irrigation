@@ -3,7 +3,7 @@
 
 #include "valve_control.h"
 #include "system_timer.h"
-#include "valve_messaging.h"
+#include "vc-interface.h"
 
 /* global state */
 static int is_valve_open = 0;
