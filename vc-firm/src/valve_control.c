@@ -15,8 +15,7 @@ static GPIO_TypeDef *get_gpio_base(int valve_number)
 {
     GPIO_TypeDef *gpio_base = 0;
 
-    switch (Valve_Ports[valve_number])
-    {
+    switch (Valve_Ports[valve_number]) {
     case VALVE_PORTA:
         gpio_base = GPIOA;
         break;
@@ -43,8 +42,7 @@ void init_valves(void)
     uint32_t gpio_enabled_clocks = 0;
     for (int i = 0; i < N_VALVES; ++i)
     {
-        switch (Valve_Ports[i])
-        {
+        switch (Valve_Ports[i]) {
         case VALVE_PORTA:
             gpio_enabled_clocks |= RCC_AHBENR_GPIOAEN;
             break;
@@ -65,8 +63,7 @@ void init_valves(void)
     RCC->AHBENR |= gpio_enabled_clocks;
 
     /* setup pin modes and intial values */
-    for (int i = 0; i < N_VALVES; ++i)
-    {
+    for (int i = 0; i < N_VALVES; ++i) {
         /* get the base address of the gpio port of pin i */
         GPIO_TypeDef *current_gpio_base = get_gpio_base(i);
         
@@ -88,8 +85,7 @@ void init_valves(void)
 
 void close_all_valves(void)
 {
-    for (int i = 0; i < N_VALVES; ++i)
-    {
+    for (int i = 0; i < N_VALVES; ++i) {
         GPIO_TypeDef *current_gpio_base = get_gpio_base(i);
         int pin_number = Valve_Pins[i];
         CLEAR_BIT(current_gpio_base->ODR, (GPIO_ODR_0 << pin_number));
@@ -112,9 +108,7 @@ void open_valve(uint8_t valve_number)
 {
     if (current_open_valve != valve_number) { close_valve(); }
 
-    if (valve_number >= N_VALVES) {
-        return;
-    }
+    if (valve_number >= N_VALVES) { return; }
 
     GPIO_TypeDef *current_gpio_base = get_gpio_base(valve_number);
     int pin_number = Valve_Pins[valve_number];
@@ -132,8 +126,7 @@ void handle_request(uint8_t request)
     uint8_t opcode = vc_get_opcode(request);
     uint8_t arg = vc_get_arg(request);
 
-    switch (opcode)
-    {
+    switch (opcode) {
     case VC_OPCODE_OPEN:
         open_valve(arg);
         break;
