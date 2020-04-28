@@ -1,2 +1,0 @@
-* Switch out excess __sync_synchronize() calls for compiler barriers (barrier())
-
