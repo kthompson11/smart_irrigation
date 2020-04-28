@@ -7,6 +7,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+/**
+ * Sets the hardware up for the tasks
+ */
 static void setup_hardware(void)
 {
     init_valves();

@@ -10,7 +10,11 @@ static int is_valve_open = 0;
 static int current_open_valve = 0;
 static TickType_t open_ticks_left = 0;  /* number of ticks until auto shutoff */
 
-
+/**
+ * Gets the GPIO base address
+ * 
+ * @param valve_number the valve number
+ */
 static GPIO_TypeDef *get_gpio_base(int valve_number)
 {
     GPIO_TypeDef *gpio_base = 0;
@@ -83,6 +87,9 @@ void init_valves(void)
     }
 }
 
+/**
+ * Closes all the valves
+ */
 void close_all_valves(void)
 {
     for (int i = 0; i < N_VALVES; ++i) {
@@ -94,6 +101,9 @@ void close_all_valves(void)
     is_valve_open = 0;
 }
 
+/**
+ * Closes the currently open valve
+ */
 void close_valve(void)
 {
     GPIO_TypeDef *current_gpio_base = get_gpio_base(current_open_valve);
@@ -104,6 +114,11 @@ void close_valve(void)
     is_valve_open = 0;
 }
 
+/**
+ * Opens the specified valve
+ * 
+ * @param valve_number number of the valve to open
+ */
 void open_valve(uint8_t valve_number)
 {
     if (current_open_valve != valve_number) { close_valve(); }
@@ -120,6 +135,11 @@ void open_valve(uint8_t valve_number)
     current_open_valve = valve_number;
 }
 
+/**
+ * Decodes and handles a request
+ * 
+ * @param request the request to handle
+ */
 void handle_request(uint8_t request)
 {
     /* decode request */
