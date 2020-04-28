@@ -6,8 +6,6 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
-#include "constants.h"
-
 #define N_VALVES 2
 #define MAX_OPEN_MS_COUNT (60 * 1000)
 

@@ -2,7 +2,6 @@
    Only one task using valve_task should be created. */
 
 #include "valve_control.h"
-#include "system_timer.h"
 #include "vc-interface.h"
 
 /* global state */
