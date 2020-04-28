@@ -1,22 +1,11 @@
-"smart_irrigation" is a project aimed at creating a smart irrigation timer.
-The timer will be programmable through a web interface and will be able to
-query a weather API in order to adjust its watering schedule. The project
-comprises two parts called timer_control and valve_control.
+"smart_irrigation" is a project aimed at creating a smart irrigation timer.  The
+timer will be programmable through a web interface and will be able to query a
+weather API in order to adjust its watering schedule.
 
-########## timer_control ##########
+########## vc-firm ##########
 
-"timer_control" contains modules/software that run on the raspberry pi. 
-Additionally, it contains yocto configuration files and a layer used to 
-build the linux system for the raspberry pi.
-
-	bcm2835_spi - user-mode spi library (no longer used)
-	spi_dev - spi kernel module for communication with the microcontroller
-	yocto - linux build configuration and layer files
-
-########## valve_control ##########
-
-"valve_control" contains the firmware for the stm32f051 microcontroller. It
-handles communication with the raspberry pi and controls the valves.
+Contains the firmware for the microcontroller. The microcontroller handles
+requests over SPI to open and close valves.
 
 ########## yocto ##########
 
@@ -24,4 +13,5 @@ Contains the Yocto Project layer and configuration files.
 
 ########## vc-driver ##########
 
-Contains the driver for the microcontroller.
+Contains the driver for the microcontroller. The driver handles requests to open
+and close valves and forwards them over SPI to the microcontroller.
