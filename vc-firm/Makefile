@@ -46,7 +46,7 @@ LIB_DIR = /usr/lib/arm-none-eabi/lib/thumb/v6-m/nofp
 # Flags
 MCU  = cortex-m0
 MCFLAGS = -mcpu=$(MCU)
-DEBUG_FLAGS = -ggdb #-gdwarf-2
+DEBUG_FLAGS = -gdwarf-2
 ASFLAGS = $(MCFLAGS) $(DEBUG_FLAGS) -mthumb  -Wa,-amhls=$(<:%.s=%.lst)
 CFLAGS = $(MCFLAGS) -D $(MCU_DEFINE) $(DEBUG_FLAGS) -O0 -falign-functions=4 -mthumb -fomit-frame-pointer -Wall -Wstrict-prototypes -fverbose-asm -Wa,-ahlms=$(<:%.c=%.lst) $(DEFS)
 LDFLAGS = $(MCFLAGS) $(DEBUG_FLAGS) -mthumb -nostartfiles --specs=nosys.specs --specs=nano.specs -Wl,-Map=$(OUTDIR)/$(PROJECT).map,--cref,--no-warn-mismatch,--gc-sections -L$(LIB_DIR)
@@ -59,17 +59,17 @@ all : $(OBJ) $(OUT_NAME).elf $(OUT_NAME).hex $(OUT_NAME).bin
 flash: all
 	st-flash write $(OUT_NAME).bin 0x8000000
 
-%.elf : $(OBJ)
+%.elf : $(OBJ) $(LINKER_SCRIPT)
 	$(CC) $(LDFLAGS) -T$(LINKER_SCRIPT) $(OBJ) -o $@
 
 %.hex: %.elf
 	$(HEX) $< $@
 
 %.bin: %.elf
-	$(BIN)  $< $@
+	$(BIN) $< $@
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) $(INCDIRS) $< -o $@
+	$(CC) -c $(CFLAGS) -MMD $(INCDIRS) $< -o $@
 
 %.o : %.s
 	$(AS) -c $(ASFLAGS) $< -o $@

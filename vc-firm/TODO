@@ -1,1 +1,2 @@
 Create seperate debug targets for flash and build
+Add header file dependencies to Makefile
