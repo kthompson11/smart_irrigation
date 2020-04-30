@@ -1,9 +1,11 @@
 /* Handles opening and closing valves based on incoming requests. 
    Only one task using valve_task should be created. */
 
+#include <stm32f0xx.h>
+
 #include "valve_control.h"
 #include "vc-interface.h"
-#include "vc-config.h"
+#include "pin_config.h"
 
 /* global state */
 static int is_valve_open = 0;

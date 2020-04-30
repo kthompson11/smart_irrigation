@@ -1,2 +1,4 @@
 Add scheduling and weather retrieval
 Add web interface
+vc-driver: allow multiple opens
+vc-driver: add ioctl functions

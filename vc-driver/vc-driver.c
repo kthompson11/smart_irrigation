@@ -31,12 +31,15 @@ static struct driver_data drv_data;
 
 static int op_write(u8 cmd, u8 arg, struct spi_device *spi)
 {
-	u8 tx_buf = vc_make_request(cmd, arg);
-	struct spi_transfer tx = {
-		.tx_buf = &tx_buf,
-		.len = 1,
-	};
+	u8 request = vc_make_request(cmd, arg);
+	struct spi_transfer tx;
 	struct spi_message message;
+	/* abort and return error code if request is invalid */
+	if (!vc_is_request_valid(request)) {
+		return -EFAULT; /* TODO: determine correct error code */
+	}
+	tx.tx_buf = &request;
+	tx.len = 1;
 
 	spi_message_init(&message);
 	spi_message_add_tail(&tx, &message);
