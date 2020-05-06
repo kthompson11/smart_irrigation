@@ -92,6 +92,44 @@ static ssize_t valve_control_write(struct file *filp, const char __user *buf,
 	return size;
 }
 
+long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	struct device_data *data = filp->private_data;
+	u8 opcode;
+	u8 req_arg;
+	int retval;
+
+	switch (cmd){
+	/* writes */
+	case VC_IOC_WR_OPEN:
+		opcode = VC_OPCODE_OPEN;
+		break;
+	case VC_IOC_WR_CLOSE:
+		opcode = VC_OPCODE_CLOSE;
+		break;
+
+	/* reads */
+	case VC_IOC_RD_OPENTIME:
+		return put_user(MAX_OPEN_MS_COUNT, (int __user *)arg);
+		break;
+	case VC_IOC_RD_NVALVES:
+		return put_user(N_VALVES, (int __user *)arg);
+		break;
+
+	default:
+		return -ENOTTY;
+	}
+
+	retval = get_user(req_arg, (int __user *)arg);
+	if (!retval) {
+		spin_lock_irq(&data->lock);
+		retval = op_write(opcode, arg, data->spi);
+		spin_unlock_irq(&data->lock);
+	}
+
+	return retval;
+}
+
 static int valve_control_open(struct inode *inode, struct file *filp)
 {
 	struct device_data *data = container_of(inode->i_cdev, 
@@ -127,6 +165,7 @@ static const struct file_operations valve_control_fops = {
 	.llseek = no_llseek,
 	.read = valve_control_read,
 	.write = valve_control_write,
+	.unlocked_ioctl = valve_control_ioctl,
 	.open = valve_control_open,
 	.release = valve_control_release,
 };
