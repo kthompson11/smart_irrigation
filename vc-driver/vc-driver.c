@@ -32,7 +32,7 @@ static struct driver_data drv_data;
 static int op_write(u8 cmd, u8 arg, struct spi_device *spi)
 {
 	u8 request = vc_make_request(cmd, arg);
-	struct spi_transfer tx;
+	struct spi_transfer tx = {0};
 	struct spi_message message;
 	/* abort and return error code if request is invalid */
 	if (!vc_is_request_valid(request)) {
@@ -99,7 +99,7 @@ long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	u8 req_arg;
 	int retval;
 
-	switch (cmd){
+	switch (cmd) {
 	/* writes */
 	case VC_IOC_WR_OPEN:
 		opcode = VC_OPCODE_OPEN;
@@ -123,7 +123,7 @@ long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	retval = get_user(req_arg, (int __user *)arg);
 	if (!retval) {
 		spin_lock_irq(&data->lock);
-		retval = op_write(opcode, arg, data->spi);
+		retval = op_write(opcode, req_arg, data->spi);
 		spin_unlock_irq(&data->lock);
 	}
 
