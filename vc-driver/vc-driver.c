@@ -31,6 +31,11 @@ static struct driver_data drv_data;
 
 static int op_write(u8 cmd, u8 arg, struct spi_device *spi)
 {
+	/* check if device no longer exists */
+	if (spi == NULL) {
+		return -ESHUTDOWN;
+	}
+
 	u8 request = vc_make_request(cmd, arg);
 	struct spi_transfer tx = {0};
 	struct spi_message message;
@@ -155,7 +160,11 @@ static int valve_control_release(struct inode *inode, struct file *filp)
 	data->users -= 1;
 	spin_unlock_irq(&data->lock);
 
-	/* TODO: free data if device no longer exists */
+	/* free data if device no longer exists */
+	if ((data->users == 0) && (data->spi == NULL)) {
+		kfree(data->buf);
+		kfree(data);
+	}
 
 	return 0;
 }
@@ -234,8 +243,12 @@ static int valve_control_remove(struct spi_device *spi)
 
 	device_destroy(drv_data.class, data->devt);
 	cdev_del(&data->cdev);
-	kfree(data->buf);
-	kfree(data);
+
+	if (data->users == 0) {
+		kfree(data->buf);
+		kfree(data);
+	}
+
 	return 0;
 }
 
