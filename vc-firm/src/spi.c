@@ -42,6 +42,7 @@ void spi1_init(void)
 void spi_task(void *param)
 {
     struct spi_task_data *data = (struct spi_task_data*)param;
+    uint8_t response;
 
     /* continuously poll for incoming requests */
     /* TODO: switch from polling to interrupts */
@@ -49,8 +50,12 @@ void spi_task(void *param)
         int is_rx_pending = SPI1->SR & SPI_SR_RXNE;
 
         if (is_rx_pending) {
-            uint8_t request = SPI1->DR;
-            xQueueSend(data->req_out_handle, &request, portMAX_DELAY);
+            uint8_t mosi_data = SPI1->DR;
+            xQueueSend(data->mosi_queue, &mosi_data, portMAX_DELAY);
         }
+
+        /* discard response data for now */
+        /* TODO: respond to request */
+        xQueueReceive(data->miso_queue, &response, 0);
     }
 }

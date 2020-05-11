@@ -2,6 +2,7 @@
 
 #include "valve_control.h"
 #include "spi.h"
+#include "decode.h"
 
 /* FreeRTOS headers */
 #include <FreeRTOS.h>
@@ -20,19 +21,29 @@ int main(void)
 {
     setup_hardware();
 
-    /* create queue */
-    QueueHandle_t req_queue = xQueueCreate(1, 1);
+    /* create queues */
+    QueueHandle_t spi_mosi_queue = xQueueCreate(1, 1);
+    QueueHandle_t spi_miso_queue = xQueueCreate(1, 1);
+    QueueHandle_t vc_req_queue = xQueueCreate(1, 1);
 
     /* create tasks */
     struct spi_task_data spi_data = {
-        .req_out_handle = req_queue,
+        .mosi_queue = spi_mosi_queue,
+        .miso_queue = spi_miso_queue,
     };
     xTaskCreate(spi_task, "spi1", configMINIMAL_STACK_SIZE, &spi_data, 1, NULL);
 
     struct valve_task_data valve_data = {
-        .req_handle = req_queue,
+        .req_handle = vc_req_queue,
     };
     xTaskCreate(valve_task, "valve", configMINIMAL_STACK_SIZE, &valve_data, 2, NULL);
+
+    struct decode_task_data decode_data = {
+        .spi_mosi_queue = spi_mosi_queue,
+        .spi_miso_queue = spi_miso_queue,
+        .valve_control_queue = vc_req_queue,
+    };
+    xTaskCreate(decode_task, "decode", configMINIMAL_STACK_SIZE, &decode_data, 2, NULL);
 
     /* start running tasks */
     vTaskStartScheduler();

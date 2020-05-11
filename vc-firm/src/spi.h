@@ -5,7 +5,8 @@
 #include <queue.h>
 
 struct spi_task_data {
-    QueueHandle_t req_out_handle; /* handle to forward bytes to */
+    QueueHandle_t mosi_queue;
+    QueueHandle_t miso_queue;
 };
 
 /**

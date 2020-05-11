@@ -11,8 +11,10 @@
 #include <stdint.h>
 #endif /* __KERNEL__ */
 
+/* TODO: move these defines out of interface header */
 /* vc-firm configuration constants */
 #define N_VALVES 2
+/* number of seconds must fit in uint8_t (VC_OPCODE_OPENTIME) */
 #define MAX_OPEN_MS_COUNT (60 * 1000)
 
 /* 
@@ -26,6 +28,8 @@
 
 #define VC_OPCODE_OPEN      0x00
 #define VC_OPCODE_CLOSE     0x01
+#define VC_OPCODE_OPENTIME  0x02
+#define VC_OPCODE_NVALVES   0x03
 
 static inline uint8_t vc_make_request(uint8_t opcode, uint8_t arg)
 {
