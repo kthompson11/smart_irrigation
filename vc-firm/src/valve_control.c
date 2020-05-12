@@ -142,11 +142,11 @@ void open_valve(uint8_t valve_number)
  * 
  * @param request the request to handle
  */
-void handle_request(uint8_t request)
+void handle_request(req_type request)
 {
     /* decode request */
-    uint8_t opcode = vc_get_opcode(request);
-    uint8_t arg = vc_get_arg(request);
+    req_type opcode = vc_get_opcode(request);
+    req_type arg = vc_get_arg(request);
 
     switch (opcode) {
     case VC_OPCODE_OPEN:
@@ -165,7 +165,7 @@ void valve_task(void *param)
 {
     struct valve_task_data *data = (struct valve_task_data*)param;
     QueueHandle_t req_handle = data->req_handle;
-    uint8_t request;
+    req_type request;
 
     for (;;) {
         BaseType_t status;

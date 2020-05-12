@@ -6,7 +6,7 @@
 void decode_task(void *param)
 {
     struct decode_task_data *data = (struct decode_task_data *)param;
-    uint8_t request, response;
+    req_type request, response;
     
     for (;;) {
         xQueueReceive(data->spi_mosi_queue, &request, portMAX_DELAY);

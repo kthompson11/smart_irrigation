@@ -3,6 +3,7 @@
 #include "valve_control.h"
 #include "spi.h"
 #include "decode.h"
+#include "vc-interface.h"
 
 /* FreeRTOS headers */
 #include <FreeRTOS.h>
@@ -22,9 +23,9 @@ int main(void)
     setup_hardware();
 
     /* create queues */
-    QueueHandle_t spi_mosi_queue = xQueueCreate(1, 1);
-    QueueHandle_t spi_miso_queue = xQueueCreate(1, 1);
-    QueueHandle_t vc_req_queue = xQueueCreate(1, 1);
+    QueueHandle_t spi_mosi_queue = xQueueCreate(1, sizeof(req_type));
+    QueueHandle_t spi_miso_queue = xQueueCreate(1, sizeof(req_type));
+    QueueHandle_t vc_req_queue = xQueueCreate(1, sizeof(req_type));
 
     /* create tasks */
     struct spi_task_data spi_data = {

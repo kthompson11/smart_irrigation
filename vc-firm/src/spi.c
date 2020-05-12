@@ -4,6 +4,7 @@
 #include <stm32f0xx.h>
 
 #include "spi.h"
+#include "vc-interface.h"
 
 void spi1_init(void)
 {
@@ -42,18 +43,38 @@ void spi1_init(void)
 void spi_task(void *param)
 {
     struct spi_task_data *data = (struct spi_task_data*)param;
-    uint8_t response;
+    req_type response, request;
+    const int rx_size = sizeof(req_type);
+    uint8_t rx_buf[rx_size];
+    int bytes_received = 0;
+    int prev_cs = GPIOA->IDR & GPIO_IDR_4;
 
     /* continuously poll for incoming requests */
     /* TODO: switch from polling to interrupts */
     for (;;) {
-        int is_rx_pending = SPI1->SR & SPI_SR_RXNE;
-
-        if (is_rx_pending) {
-            uint8_t mosi_data = SPI1->DR;
-            xQueueSend(data->mosi_queue, &mosi_data, portMAX_DELAY);
+        /******************** handle rx data ********************/
+        /* reset bytes_received on assertion (falling edge) of chip select */
+        int current_cs = GPIOA->IDR & GPIO_IDR_4;
+        if ((prev_cs != current_cs) && (current_cs == 0)) {
+            bytes_received = 0;
+            prev_cs = current_cs;
         }
 
+        int is_rx_pending = SPI1->SR & SPI_SR_RXNE;
+        if (is_rx_pending) {
+                rx_buf[bytes_received] = SPI1->DR;
+                bytes_received += 1;
+        }
+        
+        /* send request when all bytes received */
+        if (bytes_received == rx_size) {
+            request = *((req_type *)rx_buf);
+            bytes_received = 0;
+            xQueueSend(data->mosi_queue, &request, portMAX_DELAY);
+        }
+
+
+        /******************** handle tx data ********************/
         /* discard response data for now */
         /* TODO: respond to request */
         xQueueReceive(data->miso_queue, &response, 0);

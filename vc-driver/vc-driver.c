@@ -29,22 +29,25 @@ struct driver_data {
 };
 static struct driver_data drv_data;
 
-static int op_write(u8 cmd, u8 arg, struct spi_device *spi)
+static int op_write(req_type cmd, req_type arg, struct spi_device *spi)
 {
+	req_type request;
+	struct spi_transfer tx = {0};
+	struct spi_message message;
+
 	/* check if device no longer exists */
 	if (spi == NULL) {
 		return -ESHUTDOWN;
 	}
 
-	u8 request = vc_make_request(cmd, arg);
-	struct spi_transfer tx = {0};
-	struct spi_message message;
+	request = vc_make_request(cmd, arg);
 	/* abort and return error code if request is invalid */
 	if (!vc_is_request_valid(request)) {
 		return -EFAULT; /* TODO: determine correct error code */
 	}
 	tx.tx_buf = &request;
-	tx.len = 1;
+	tx.len = sizeof(request);
+	tx.speed_hz = 100000;
 
 	spi_message_init(&message);
 	spi_message_add_tail(&tx, &message);
@@ -100,8 +103,8 @@ static ssize_t valve_control_write(struct file *filp, const char __user *buf,
 long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	struct device_data *data = filp->private_data;
-	u8 opcode;
-	u8 req_arg;
+	req_type opcode;
+	req_type req_arg;
 	int retval;
 
 	switch (cmd) {
@@ -114,6 +117,7 @@ long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 
 	/* reads */
+	/* TODO: query and store this data on startup */
 	case VC_IOC_RD_OPENTIME:
 		return put_user(MAX_OPEN_MS_COUNT, (int __user *)arg);
 		break;
