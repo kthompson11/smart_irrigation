@@ -29,11 +29,14 @@ struct driver_data {
 };
 static struct driver_data drv_data;
 
-static int op_write(req_type cmd, req_type arg, struct spi_device *spi)
+static int op_write(req_type cmd, req_type arg, struct spi_device *spi, req_type *resp)
 {
 	req_type request;
+	req_type response = 0;
 	struct spi_transfer tx = {0};
+	struct spi_transfer rx = {0};
 	struct spi_message message;
+	int status;
 
 	/* check if device no longer exists */
 	if (spi == NULL) {
@@ -47,12 +50,39 @@ static int op_write(req_type cmd, req_type arg, struct spi_device *spi)
 	}
 	tx.tx_buf = &request;
 	tx.len = sizeof(request);
-	tx.speed_hz = 100000;
+	tx.speed_hz = 100000; /* TODO: set speed globally */
+	tx.delay_usecs = 1000;
+
+	rx.rx_buf = &response;
+	rx.len = sizeof(response);
+	rx.speed_hz = 100000; /* TODO: set speed globally */
 
 	spi_message_init(&message);
 	spi_message_add_tail(&tx, &message);
-	
-	return spi_sync(spi, &message);
+	spi_message_add_tail(&rx, &message);
+
+	/* send request and get response */
+	status = spi_sync(spi, &message);
+	if (!status) {
+		return status;
+	}
+	/* check response */
+	if (response < 0) {
+		switch (response) {
+		case -VC_EREQ:
+			return -ECOMM;
+			break;
+		default:
+			return -ECOMM;
+			break;
+		}
+	}
+
+	/* return response if required */
+	if (resp != NULL) {
+		*resp = response;
+	}
+	return 0;
 }
 
 /************************* file_operations functions **************************/
@@ -90,9 +120,9 @@ static ssize_t valve_control_write(struct file *filp, const char __user *buf,
 	/* TODO: check arg with function from valve_messaging.h */
 	spin_lock_irq(&data->lock);
 	if (!strcmp(cmd, VCOPEN))
-		op_write(VC_OPCODE_OPEN, arg, data->spi);
+		op_write(VC_OPCODE_OPEN, arg, data->spi, NULL);
 	else if (!strcmp(cmd, VCCLOSE))
-		op_write(VC_OPCODE_CLOSE, arg, data->spi);
+		op_write(VC_OPCODE_CLOSE, arg, data->spi, NULL);
 	else
 		return -EFAULT; /* TODO: determine corect error code */
 	spin_unlock_irq(&data->lock);
@@ -132,7 +162,7 @@ long valve_control_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	retval = get_user(req_arg, (int __user *)arg);
 	if (!retval) {
 		spin_lock_irq(&data->lock);
-		retval = op_write(opcode, req_arg, data->spi);
+		retval = op_write(opcode, req_arg, data->spi, NULL);
 		spin_unlock_irq(&data->lock);
 	}
 
