@@ -7,12 +7,15 @@
 #include "vc-interface.h"
 
 static int bytes_received = 0;
+enum spi_state {SPI_IDLE, SPI_RX, SPI_TX};
+static enum spi_state state = SPI_IDLE;
 
 /**
  * Synchronizes the SPI data frame
  */
 void start_spi_data_frame(void) {
     bytes_received = 0;
+    state = SPI_RX;
 }
 
 void spi1_init(void)
@@ -64,28 +67,72 @@ void spi_task(void *param)
     const int rx_size = sizeof(req_type);
     uint8_t rx_buf[rx_size];
 
+    BaseType_t status;
+    const int tx_size = sizeof(req_type);
+    uint8_t tx_buf[tx_size];
+    int tx_bytes_left = 0;
+    int tx_bytes_sent = 0;
+
     /* continuously poll for incoming requests */
     /* TODO: switch from polling to interrupts */
     for (;;) {
-        /******************** handle rx data ********************/
-        int is_rx_pending = SPI1->SR & SPI_SR_RXNE;
-        if (is_rx_pending) {
+        switch (state) {
+        case SPI_IDLE:
+            /* do nothing */
+            /* TODO: wait for interrupt instead of busy waiting */
+            /* discard rx data */
+            if (SPI1->SR & SPI_SR_RXNE) {
+                rx_buf[bytes_received] = SPI1->DR;
+            }
+            break;
+        case SPI_RX:
+            /******************** handle rx data ********************/
+            /* if spi data available, copy to buffer */
+            if (SPI1->SR & SPI_SR_RXNE) {
                 rx_buf[bytes_received] = SPI1->DR;
                 bytes_received += 1;
-        }
-        
-        /* send request when all bytes received */
-        if (bytes_received == rx_size) {
-            request = *((req_type *)rx_buf);
-            bytes_received = 0;
-            xQueueSend(data->mosi_queue, &request, portMAX_DELAY);
-        }
+            }
 
+            /* send request when all bytes received */
+            if (bytes_received == rx_size) {
+                request = *((req_type *)rx_buf);
+                bytes_received = 0;
+                xQueueSend(data->mosi_queue, &request, portMAX_DELAY);
+                state = SPI_TX;
+            }
+            break;
+        case SPI_TX:
+            /******************** handle tx data ********************/
+            /* discard rx data */
+            if (SPI1->SR & SPI_SR_RXNE) {
+                rx_buf[bytes_received] = SPI1->DR;
+            }
 
-        /******************** handle tx data ********************/
-        /* discard response data for now */
-        /* TODO: respond to request */
-        xQueueReceive(data->miso_queue, &response, 0);
+            if (tx_bytes_left == 0) {
+                /* check for response */
+                status = xQueueReceive(data->miso_queue, &response, 0);
+                if (status == pdPASS) {
+                    tx_bytes_left = sizeof(req_type);
+                    tx_bytes_sent = 0;
+                    *((req_type *)tx_buf) = response;
+                }
+            }
+
+            /* put bytes in tx buffer if space is available */
+            while ((tx_bytes_left != 0) && (SPI1->SR & SPI_SR_TXE)) {
+                *((uint8_t *)(&SPI1->DR)) = tx_buf[tx_bytes_sent];
+                ++tx_bytes_sent;
+                --tx_bytes_left;
+
+                if (tx_bytes_left == 0) {
+                    state = SPI_IDLE;
+                }
+            }
+            break;
+        default:
+            state = SPI_IDLE;
+            break;
+        }
     }
 }
 

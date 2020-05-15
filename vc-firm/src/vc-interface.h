@@ -17,8 +17,12 @@
 /* number of seconds must fit in req_type (VC_OPCODE_OPENTIME) */
 #define MAX_OPEN_MS_COUNT (60 * 1000)
 
-typedef uint16_t req_type; /* type used to represent a request */
+typedef int16_t req_type; /* type used to represent a request */
 typedef uint16_t crc_type; /* type used for CRC checking */
+
+/* error codes */
+/* errors are returned as negative value responses */
+#define VC_EREQ             1   /* invalid request */
 
 /* 
  * valve_control request format

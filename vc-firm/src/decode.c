@@ -16,6 +16,9 @@ void decode_task(void *param)
         case VC_OPCODE_OPEN:
         case VC_OPCODE_CLOSE:
             /* forward request to valve_control task */
+            response = 0b0101010111001100;
+            /*response = 0;*/
+            xQueueSend(data->spi_miso_queue, &response, portMAX_DELAY);
             xQueueSend(data->valve_control_queue, &request, portMAX_DELAY);
             break;
         case VC_OPCODE_OPENTIME:
@@ -28,7 +31,8 @@ void decode_task(void *param)
             xQueueSend(data->spi_miso_queue, &response, portMAX_DELAY);
             break;
         default:
-            /* invalid opcode */
+            response = -VC_EREQ;
+            xQueueSend(data->spi_miso_queue, &response, portMAX_DELAY);
             break;
         }
     }
